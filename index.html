@@ -108,40 +108,6 @@
     will-change: transform;
   }
   .wheel { transform-box: fill-box; transform-origin: center; }
-  .car.lap   { animation: drive 1.2s cubic-bezier(0.3, 0, 0.2, 1) both; }
-  .car.lap .wheel { animation: spin 1.2s linear both; }
-
-  /* Vroom button: plays the engine rev (phones need a tap before sound can start) */
-  .vroom {
-    position: absolute;
-    left: 50%;
-    top: 9px;
-    transform: translateX(-50%);
-    z-index: 2;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    min-height: 40px;
-    padding: 0 16px 0 12px;
-    border: 2px solid var(--ink);
-    border-radius: 999px;
-    background: var(--surface);
-    color: var(--ink);
-    font: inherit;
-    font-weight: 800;
-    font-size: 0.98rem;
-    cursor: pointer;
-    box-shadow: 0 6px 14px -8px rgba(27, 47, 107, 0.5);
-    transition: transform 0.12s ease;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .vroom:active { transform: translateX(-50%) scale(0.95); }
-  .vroom:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
-  .vroom svg { width: 20px; height: 20px; }
-  .vroom.on { background: var(--yellow); border-color: var(--yellow); }
-  .vroom .lbl-on { display: none; }
-  .vroom.on .lbl-off { display: none; }
-  .vroom.on .lbl-on { display: inline; }
 
   /* ---------- Bunting ---------- */
   .bunting {
@@ -297,6 +263,43 @@
   .btn-google { background: var(--blue); }
   .btn-apple { background: var(--navy-btn); }
 
+  /* ---------- Play button: the little surprise ---------- */
+  .play-wrap { position: relative; margin: 22px 0 0; }
+  .play-kicker {
+    position: absolute; left: 50%; top: -12px; transform: translateX(-50%);
+    padding: 2px 12px; border-radius: 999px;
+    background: var(--red); color: #fff;
+    font-size: 0.8rem; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase;
+    white-space: nowrap; z-index: 2;
+  }
+  .play {
+    position: relative;
+    display: flex; align-items: center; gap: 14px;
+    min-height: 74px; padding: 14px 16px 12px;
+    border-radius: 18px;
+    background: var(--yellow); color: var(--ink);
+    border: 3px solid var(--ink);
+    text-decoration: none;
+    box-shadow: 0 10px 24px -12px rgba(27, 47, 107, 0.5);
+    transition: transform 0.12s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .play:active { transform: scale(0.97); }
+  .play:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
+  .play::after {
+    content: ""; position: absolute; inset: -3px; border-radius: 20px;
+    border: 3px solid var(--yellow); pointer-events: none;
+    animation: ring 2s ease-out infinite;
+  }
+  .play .pc { flex: 0 0 auto; width: 64px; height: 36px; animation: wiggle 2s ease-in-out infinite; }
+  .play .tx { display: flex; flex-direction: column; line-height: 1.2; }
+  .play .tx b { font-size: 1.2rem; font-weight: 800; }
+  .play .tx small { font-size: 0.88rem; font-weight: 600; color: var(--ink-soft); }
+  .play .go { margin-left: auto; flex: 0 0 auto; width: 36px; height: 36px; border-radius: 50%; background: var(--ink); color: #fff; display: grid; place-items: center; }
+  .play .go svg { width: 18px; height: 18px; }
+  @keyframes ring { 0% { transform: scale(1); opacity: 0.9; } 70%, 100% { transform: scale(1.08); opacity: 0; } }
+  @keyframes wiggle { 0%, 60%, 100% { transform: rotate(0); } 70% { transform: rotate(-5deg) translateX(-2px); } 80% { transform: rotate(4deg) translateX(2px); } 90% { transform: rotate(-2deg); } }
+
   .confirm {
     margin: 16px 0 0;
     padding: 10px 14px;
@@ -374,7 +377,8 @@
 
   @media (prefers-reduced-motion: reduce) {
     html.intro .l-red, html.intro .l-yel, html.intro .l-grn, html.intro .flagstrip, html.intro .car,
-    html.intro .wheel, html.intro .card, html.intro .fade, .num .v.in, .num .v.out, .burst i {
+    html.intro .wheel, html.intro .card, html.intro .fade, .num .v.in, .num .v.out, .burst i,
+    .play::after, .play .pc {
       animation: none !important;
     }
     .btn { transition: none; }
@@ -385,26 +389,21 @@
     .track { height: 84px; }
     .car { width: 96px; height: 44px; right: 24px; }
     .lights { left: 24px; top: 10px; }
-    .vroom { top: 14px; }
     main { padding-top: 14px; }
   }
 </style>
 </head>
 <body>
 
-<header class="track">
-  <button class="vroom" id="vroom" type="button" aria-label="Play engine sound">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10v4h3l4 4V6L7 10z" fill="currentColor"/><path d="M15 9a3.5 3.5 0 0 1 0 6M17.5 6.5a7 7 0 0 1 0 11"/></svg>
-    <span class="lbl-off">Vroom!</span><span class="lbl-on">Stop</span>
-  </button>
-  <svg class="lights" viewBox="0 0 26 60" aria-hidden="true">
+<header class="track" aria-hidden="true">
+  <svg class="lights" viewBox="0 0 26 60">
     <rect x="1" y="1" width="24" height="58" rx="7" fill="#2B2B30" stroke="#000" stroke-opacity=".25"/>
     <circle class="lamp l-red" cx="13" cy="12" r="6.5" fill="#D62828"/>
     <circle class="lamp l-yel" cx="13" cy="30" r="6.5" fill="#F2B705"/>
     <circle class="lamp l-grn" cx="13" cy="48" r="6.5" fill="#2BB673"/>
   </svg>
-  <div class="flagstrip" aria-hidden="true"></div>
-  <svg class="car" id="car" viewBox="0 0 96 44" aria-hidden="true">
+  <div class="flagstrip"></div>
+  <svg class="car" viewBox="0 0 96 44">
     <path fill="#D62828" d="M8 34C5 34 3 32 3 29v-4c0-3 2-5 5-5h18l10-11c2-2 4-3 7-3h17c3 0 5 1 7 4l8 10h14c3 0 5 2 5 5v4c0 3-2 5-5 5z"/>
     <path fill="#B71F1F" d="M3 29h90v2c0 2-2 3-4 3H7c-2 0-4-1-4-3z"/>
     <path fill="#DCEBFF" d="M31 19l8-9h9v9zM52 10h8c2 0 3 1 4 2l5 7H52z"/>
@@ -475,6 +474,24 @@
   </div>
 
   <p class="confirm" id="confirm" role="status" aria-live="polite" hidden></p>
+
+  <div class="play-wrap fade d6">
+    <span class="play-kicker" aria-hidden="true">A little surprise</span>
+    <a class="play" href="race.html">
+      <svg class="pc" viewBox="0 0 96 44" aria-hidden="true">
+        <path fill="#D62828" d="M8 34C5 34 3 32 3 29v-4c0-3 2-5 5-5h18l10-11c2-2 4-3 7-3h17c3 0 5 1 7 4l8 10h14c3 0 5 2 5 5v4c0 3-2 5-5 5z"/>
+        <path fill="#B71F1F" d="M3 29h90v2c0 2-2 3-4 3H7c-2 0-4-1-4-3z"/>
+        <path fill="#DCEBFF" d="M31 19l8-9h9v9zM52 10h8c2 0 3 1 4 2l5 7H52z"/>
+        <rect x="44" y="20" width="8" height="14" fill="#FFF8E8"/>
+        <circle cx="48" cy="27" r="6.5" fill="#fff"/>
+        <text x="48" y="31" text-anchor="middle" font-size="10" font-weight="800" fill="#1B2F6B" font-family="'Baloo 2', Arial, sans-serif">2</text>
+        <g><circle cx="22" cy="34" r="8.5" fill="#1C1C1F"/><circle cx="22" cy="34" r="4.5" fill="#C9C9CF"/></g>
+        <g><circle cx="74" cy="34" r="8.5" fill="#1C1C1F"/><circle cx="74" cy="34" r="4.5" fill="#C9C9CF"/></g>
+      </svg>
+      <span class="tx"><b>Play Ram’s Racing</b><small>Dodge the cones, reach the finish line</small></span>
+      <span class="go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></span>
+    </a>
+  </div>
 
   <p class="sign fade d6">With regards,<b>Pavan Kumar Paruchuri</b></p>
 </main>
@@ -608,112 +625,6 @@
   }
   btnGoogle.addEventListener("click", onCalendarTap);
   btnApple.addEventListener("click", onCalendarTap);
-
-  /* ---- Vroom: a synthesised engine rev (no audio file), about 7.5 s, plus a car lap ---- */
-  var AC = window.AudioContext || window.webkitAudioContext;
-  var vroomBtn = doc.getElementById("vroom");
-  var car = doc.getElementById("car");
-  var actx = null, running = null;
-
-  function carLap() {
-    car.classList.remove("lap");
-    void car.getBoundingClientRect();
-    car.classList.add("lap");
-    setTimeout(function () { car.classList.remove("lap"); }, 1300);
-  }
-
-  function stopVroom() {
-    if (!running) return;
-    var r = running; running = null;
-    clearTimeout(r.lapTimer); clearTimeout(r.endTimer);
-    try {
-      var t = actx.currentTime;
-      r.master.gain.cancelScheduledValues(t);
-      r.master.gain.setValueAtTime(r.master.gain.value, t);
-      r.master.gain.linearRampToValueAtTime(0.0001, t + 0.15);
-      r.nodes.forEach(function (n) { n.stop(t + 0.2); });
-    } catch (err) {}
-    vroomBtn.classList.remove("on");
-    vroomBtn.setAttribute("aria-label", "Play engine sound");
-  }
-
-  function playVroom() {
-    if (!AC) return false;
-    if (!actx) actx = new AC();
-    if (actx.state === "suspended") actx.resume();
-    if (actx.state !== "running") return false;
-    stopVroom();
-
-    var t = actx.currentTime, dur = 7.5, sr = actx.sampleRate;
-    var master = actx.createGain(); master.gain.setValueAtTime(0.0001, t); master.connect(actx.destination);
-
-    var lp = actx.createBiquadFilter(); lp.type = "lowpass"; lp.Q.value = 3; lp.connect(master);
-    var saw = actx.createOscillator(); saw.type = "sawtooth"; saw.connect(lp);
-    var sq = actx.createOscillator(); sq.type = "square";
-    var sqG = actx.createGain(); sqG.gain.value = 0.3; sq.connect(sqG); sqG.connect(lp);
-    var wob = actx.createOscillator(); wob.frequency.value = 16;
-    var wobG = actx.createGain(); wobG.gain.value = 5; wob.connect(wobG); wobG.connect(saw.frequency);
-
-    var buf = actx.createBuffer(1, sr * 2, sr), d = buf.getChannelData(0);
-    for (var i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
-    var noise = actx.createBufferSource(); noise.buffer = buf; noise.loop = true;
-    var bp = actx.createBiquadFilter(); bp.type = "bandpass"; bp.Q.value = 0.7;
-    var nG = actx.createGain(); nG.gain.value = 0.1;
-    noise.connect(bp); bp.connect(nG); nG.connect(master);
-
-    /* [seconds, engine hz]: idle, three gears, then drive away */
-    var pts = [[0, 46], [0.5, 50], [0.7, 58], [2.0, 215], [2.1, 125], [3.6, 265], [3.7, 160], [5.4, 310], [6.0, 290], [7.5, 80]];
-    pts.forEach(function (p, i) {
-      var at = t + p[0], hz = p[1];
-      if (i === 0) {
-        saw.frequency.setValueAtTime(hz, at); sq.frequency.setValueAtTime(hz / 2, at);
-        lp.frequency.setValueAtTime(Math.max(400, hz * 9), at); bp.frequency.setValueAtTime(hz * 14, at);
-        return;
-      }
-      var sharp = (p[0] - pts[i - 1][0]) < 0.2;
-      var m = sharp ? "linearRampToValueAtTime" : "exponentialRampToValueAtTime";
-      saw.frequency[m](hz, at); sq.frequency[m](hz / 2, at);
-      lp.frequency[m](Math.min(5000, Math.max(400, hz * 9)), at); bp.frequency[m](Math.min(7000, hz * 14), at);
-      if (sharp) { /* gear change: brief dip */
-        master.gain.setValueAtTime(0.5, at - 0.1); master.gain.linearRampToValueAtTime(0.18, at); master.gain.linearRampToValueAtTime(0.5, at + 0.12);
-      }
-    });
-    master.gain.linearRampToValueAtTime(0.5, t + 0.35);
-    master.gain.setValueAtTime(0.5, t + 6.0);
-    master.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-
-    var nodes = [saw, sq, wob, noise];
-    nodes.forEach(function (n) { n.start(t); n.stop(t + dur + 0.05); });
-
-    running = { master: master, nodes: nodes };
-    running.lapTimer = setTimeout(carLap, 1900);
-    running.endTimer = setTimeout(function () { if (running) { running = null; vroomBtn.classList.remove("on"); vroomBtn.setAttribute("aria-label", "Play engine sound"); } }, dur * 1000);
-    vroomBtn.classList.add("on");
-    vroomBtn.setAttribute("aria-label", "Stop engine sound");
-    return true;
-  }
-
-  vroomBtn.addEventListener("click", function () {
-    if (running) { stopVroom(); return; }
-    if (!playVroom() && actx) {
-      /* First tap only unlocked audio on some phones: try once more right after. */
-      actx.resume().then(function () { playVroom(); }, function () {});
-    }
-  });
-
-  /* Try to autoplay; most phones refuse until the guest taps, and the button covers that. */
-  if (AC) {
-    try {
-      actx = new AC();
-      var attempt = function () {
-        actx.resume().then(function () { if (actx.state === "running" && !running) playVroom(); }, function () {});
-      };
-      if (actx.state === "running") setTimeout(function () { if (!running) playVroom(); }, 700);
-      else setTimeout(attempt, 700);
-    } catch (err) {}
-  } else {
-    vroomBtn.hidden = true;
-  }
 })();
 </script>
 </body>

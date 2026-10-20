@@ -3,3 +3,4 @@
 *.webp binary
 *.html text
 *.md text
+*.mp3 binary
