@@ -1,0 +1,5 @@
+*.ics -text
+*.jpg binary
+*.webp binary
+*.html text
+*.md text
