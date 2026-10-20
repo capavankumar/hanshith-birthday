@@ -1,0 +1,26 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Paruchuri Family//Birthday Invite//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+UID:hanshith-ram-2nd-birthday-20261024@paruchuri
+DTSTAMP:20261018T000000Z
+DTSTART:20261024T053000Z
+DTEND:20261024T083000Z
+SUMMARY:Hanshith Ram's 2nd Birthday
+LOCATION:Signature Dine\, 3rd Line\, Brindavan Gardens\, Guntur
+DESCRIPTION:Hanshith Ram's 2nd birthday celebration\, 11:00 AM onwards.\n\nMap: https://maps.app.goo.gl/awhavZrJzygwVywA7\n\nWith regards\,\nPavan Kumar Paruchuri
+URL:https://maps.app.goo.gl/awhavZrJzygwVywA7
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Hanshith Ram's 2nd Birthday tomorrow at 11:00 AM
+TRIGGER:-P1D
+END:VALARM
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Hanshith Ram's 2nd Birthday at 11:00 AM
+TRIGGER:-PT2H
+END:VALARM
+END:VEVENT
+END:VCALENDAR
