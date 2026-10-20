@@ -91,6 +91,24 @@
   }
   .lamp { opacity: 0.22; }
   .l-grn { opacity: 1; }
+  .play-top {
+    position: absolute;
+    left: 50%; top: 9px;
+    transform: translateX(-50%);
+    z-index: 2;
+    display: inline-flex; align-items: center; gap: 8px;
+    min-height: 40px; padding: 0 16px 0 12px;
+    border: 2px solid var(--ink); border-radius: 999px;
+    background: var(--yellow); color: var(--ink);
+    font-weight: 800; font-size: 0.98rem; white-space: nowrap;
+    text-decoration: none;
+    box-shadow: 0 6px 14px -8px rgba(27, 47, 107, 0.5);
+    transition: transform 0.12s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .play-top:active { transform: translateX(-50%) scale(0.95); }
+  .play-top:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
+  .play-top svg { width: 20px; height: 20px; }
   .flagstrip {
     position: absolute;
     left: 0; right: 0; bottom: 0;
@@ -397,15 +415,19 @@
 </head>
 <body>
 
-<header class="track" aria-hidden="true">
-  <svg class="lights" viewBox="0 0 26 60">
+<header class="track">
+  <a class="play-top" href="race.html">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 21V4"/><path d="M5 4h13l-3 4 3 4H5z"/></svg>
+    Play Ram’s Racing
+  </a>
+  <svg class="lights" viewBox="0 0 26 60" aria-hidden="true">
     <rect x="1" y="1" width="24" height="58" rx="7" fill="#2B2B30" stroke="#000" stroke-opacity=".25"/>
     <circle class="lamp l-red" cx="13" cy="12" r="6.5" fill="#D62828"/>
     <circle class="lamp l-yel" cx="13" cy="30" r="6.5" fill="#F2B705"/>
     <circle class="lamp l-grn" cx="13" cy="48" r="6.5" fill="#2BB673"/>
   </svg>
-  <div class="flagstrip"></div>
-  <svg class="car" viewBox="0 0 96 44">
+  <div class="flagstrip" aria-hidden="true"></div>
+  <svg class="car" viewBox="0 0 96 44" aria-hidden="true">
     <path fill="#D62828" d="M8 34C5 34 3 32 3 29v-4c0-3 2-5 5-5h18l10-11c2-2 4-3 7-3h17c3 0 5 1 7 4l8 10h14c3 0 5 2 5 5v4c0 3-2 5-5 5z"/>
     <path fill="#B71F1F" d="M3 29h90v2c0 2-2 3-4 3H7c-2 0-4-1-4-3z"/>
     <path fill="#DCEBFF" d="M31 19l8-9h9v9zM52 10h8c2 0 3 1 4 2l5 7H52z"/>
@@ -444,7 +466,7 @@
   <p class="when fade d1">Saturday, 24 October 2026<span class="dot" aria-hidden="true">●</span>11:00 AM onwards</p>
 
   <section class="count fade d2" id="count" aria-labelledby="count-title">
-    <p class="count-title" id="count-title">The race starts in</p>
+    <p class="count-title" id="count-title">Party starts in</p>
     <div class="tiles" role="timer" id="tiles">
       <div class="tile"><div class="num" id="n-days"></div><span class="lbl">Days</span></div>
       <div class="tile"><div class="num" id="n-hours"></div><span class="lbl">Hours</span></div>
@@ -478,7 +500,7 @@
   <p class="confirm" id="confirm" role="status" aria-live="polite" hidden></p>
 
   <div class="play-wrap fade d6">
-    <span class="play-kicker" aria-hidden="true">A little surprise</span>
+    <span class="play-kicker" aria-hidden="true">Bonus</span>
     <a class="play" href="race.html">
       <svg class="pc" viewBox="0 0 96 44" aria-hidden="true">
         <path fill="#D62828" d="M8 34C5 34 3 32 3 29v-4c0-3 2-5 5-5h18l10-11c2-2 4-3 7-3h17c3 0 5 1 7 4l8 10h14c3 0 5 2 5 5v4c0 3-2 5-5 5z"/>
@@ -490,7 +512,7 @@
         <g><circle cx="22" cy="34" r="8.5" fill="#1C1C1F"/><circle cx="22" cy="34" r="4.5" fill="#C9C9CF"/></g>
         <g><circle cx="74" cy="34" r="8.5" fill="#1C1C1F"/><circle cx="74" cy="34" r="4.5" fill="#C9C9CF"/></g>
       </svg>
-      <span class="tx"><b>Play Ram’s Racing</b><small>Dodge the cones, reach the finish line</small></span>
+      <span class="tx"><b>Play Ram’s Racing</b><small>A quick game for the kids, and for you</small></span>
       <span class="go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></span>
     </a>
   </div>
@@ -563,7 +585,7 @@
         countTitle.textContent = "Thank you";
         tiles.hidden = true;
         statusLine.hidden = false;
-        statusLine.textContent = "Thank you for celebrating with us. It meant a lot to our little racer.";
+        statusLine.textContent = "Thank you for coming and making Hanshith’s day special.";
         btnGoogle.hidden = true;
         btnApple.hidden = true;
       }
@@ -572,10 +594,10 @@
     if (now >= START) {
       if (phase !== "started") {
         phase = "started";
-        countTitle.textContent = "Lights out";
+        countTitle.textContent = "Today";
         tiles.hidden = true;
         statusLine.hidden = false;
-        statusLine.textContent = "The celebration has started. See you at Signature Dine!";
+        statusLine.textContent = "The party has started. See you at Signature Dine.";
       }
       return;
     }

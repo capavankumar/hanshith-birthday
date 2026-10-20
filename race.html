@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
 <title>Ram’s Racing</title>
-<meta name="description" content="A little surprise from Hanshith Ram’s 2nd birthday invite. Tap to switch lanes, dodge the cones for 60 seconds and reach the finish line.">
+<meta name="description" content="A small game from Hanshith Ram’s 2nd birthday invite. Tap to change lanes, avoid the cones for 60 seconds and reach the finish line.">
 <meta name="robots" content="noindex">
 <meta name="color-scheme" content="light only">
 <meta name="theme-color" content="#FFF8E8">
@@ -155,34 +155,33 @@
           </g>
         </svg>
         <h1>Ram’s <span>Racing</span></h1>
-        <p class="big">A little surprise from our little racer!</p>
-        <div class="how"><span class="tap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11V5a2 2 0 0 1 4 0v6M13 9a2 2 0 0 1 4 0v2M17 11a2 2 0 0 1 4 0v4a7 7 0 0 1-7 7h-2a7 7 0 0 1-6-3.5L4 15a2 2 0 0 1 3.3-2.2L9 14"/></svg></span><span><b>Tap</b> to switch lanes. Dodge the cones for <b>60 seconds</b> to reach the finish line!</span></div>
+        <div class="how"><span class="tap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11V5a2 2 0 0 1 4 0v6M13 9a2 2 0 0 1 4 0v2M17 11a2 2 0 0 1 4 0v4a7 7 0 0 1-7 7h-2a7 7 0 0 1-6-3.5L4 15a2 2 0 0 1 3.3-2.2L9 14"/></svg></span><span><b>Tap</b> to change lanes. Avoid the cones for <b>60 seconds</b> and reach the finish line.</span></div>
         <div class="balloons" aria-hidden="true"><i class="live"></i><i class="live"></i><i class="live"></i></div>
-        <p>Three balloons. Bump a cone and one pops.</p>
-        <button class="btn" id="b-start" type="button">Start the race</button>
+        <p>You have 3 balloons. Each cone you hit pops one.</p>
+        <button class="btn" id="b-start" type="button">Start</button>
       </div>
     </div>
 
     <div class="overlay" id="ov-pause" hidden>
-      <div class="panel"><h2>Paused</h2><p>Tap to keep racing.</p><button class="btn" id="b-resume" type="button">Continue</button></div>
+      <div class="panel"><h2>Paused</h2><button class="btn" id="b-resume" type="button">Continue</button></div>
     </div>
 
     <div class="overlay" id="ov-win" hidden>
       <div class="panel">
-        <h2>🏁 You won!</h2>
-        <p class="big" id="win-line">You dodged every cone like a champion!</p>
-        <p>Hanshith says: see you on Saturday, 24 October at 11:00 AM!</p>
-        <button class="btn" id="b-again" type="button">Race again</button>
-        <a class="btn alt" href="index.html">Back to the invite</a>
+        <h2>You finished!</h2>
+        <p class="big" id="win-line">All 3 balloons safe.</p>
+        <p>See you at the party on Saturday, 24 October, 11:00 AM.</p>
+        <button class="btn" id="b-again" type="button">Play again</button>
+        <a class="btn alt" href="index.html">Back to invite</a>
       </div>
     </div>
 
     <div class="overlay" id="ov-lose" hidden>
       <div class="panel">
-        <h2>Oh no, out of balloons!</h2>
-        <p class="big" id="lose-line">So close. Try again?</p>
+        <h2>All balloons popped</h2>
+        <p class="big" id="lose-line">Try again?</p>
         <button class="btn" id="b-retry" type="button">Try again</button>
-        <a class="btn alt" href="index.html">Back to the invite</a>
+        <a class="btn alt" href="index.html">Back to invite</a>
       </div>
     </div>
   </div>
@@ -234,6 +233,19 @@
   var AC = window.AudioContext || window.webkitAudioContext;
   var actx = null, engineBuf = null, engineSrc = null, engineGain = null, muted = false, engineLoading = false;
   var engineLoop = null; // { start, end } in seconds, with the MP3 decoder's silent padding trimmed off
+  /* On a page opened straight from the file system the browser refuses to hand the MP3 to Web Audio,
+     so there the engine plays through a plain <audio> element instead. */
+  var useElement = location.protocol === "file:", engineEl = null;
+  var ENGINE_VOL = 0.7;
+
+  function ensureElement() {
+    if (engineEl) return;
+    engineEl = new Audio("engine.mp3");
+    engineEl.loop = true; engineEl.preload = "auto"; engineEl.volume = muted ? 0 : ENGINE_VOL;
+    try { engineEl.preservesPitch = false; engineEl.mozPreservesPitch = false; engineEl.webkitPreservesPitch = false; } catch (e) {}
+    /* unlock on this tap so a later play() is allowed on phones */
+    var p = engineEl.play(); if (p && p.then) p.then(function () { engineEl.pause(); engineEl.currentTime = 0; }, function () {});
+  }
 
   function trimSilence(buf) {
     var d = buf.getChannelData(0), n = d.length, th = 0.004, i = 0, j = n - 1;
@@ -247,14 +259,21 @@
     if (!AC) return;
     if (!actx) { try { actx = new AC(); } catch (e) { return; } }
     if (actx.state === "suspended") actx.resume();
+    if (useElement) { ensureElement(); return; }
     if (!engineBuf && !engineLoading) {
       engineLoading = true;
+      var fallback = function () { useElement = true; ensureElement(); if (state === "run") startEngine(); };
       fetch("engine.mp3").then(function (r) { if (!r.ok) throw new Error("no engine"); return r.arrayBuffer(); }).then(function (ab) {
-        actx.decodeAudioData(ab, function (buf) { engineBuf = buf; engineLoop = trimSilence(buf); if (state === "run") startEngine(); }, function () {});
-      }).catch(function () {});
+        actx.decodeAudioData(ab, function (buf) { engineBuf = buf; engineLoop = trimSilence(buf); if (state === "run") startEngine(); }, fallback);
+      }).catch(fallback);
     }
   }
   function startEngine() {
+    if (useElement) {
+      if (!engineEl) ensureElement();
+      if (engineEl) { engineEl.currentTime = 0; engineEl.playbackRate = 0.85; engineEl.volume = muted ? 0 : ENGINE_VOL; var p = engineEl.play(); if (p && p.catch) p.catch(function () {}); }
+      return;
+    }
     if (!actx || !engineBuf || engineSrc) return;
     engineSrc = actx.createBufferSource(); engineSrc.buffer = engineBuf; engineSrc.loop = true;
     if (engineLoop && engineLoop.end - engineLoop.start > 0.5) { engineSrc.loopStart = engineLoop.start; engineSrc.loopEnd = engineLoop.end; }
@@ -264,12 +283,14 @@
     engineGain.gain.exponentialRampToValueAtTime(muted ? 0.0001 : 0.55, actx.currentTime + 0.5);
   }
   function stopEngine() {
+    if (engineEl) { engineEl.pause(); }
     if (!engineSrc) return;
     var s = engineSrc, g = engineGain; engineSrc = null; engineGain = null;
     try { g.gain.setTargetAtTime(0.0001, actx.currentTime, 0.12); s.stop(actx.currentTime + 0.6); } catch (e) {}
   }
   function setEngine(rate) {
     if (engineSrc) engineSrc.playbackRate.setTargetAtTime(rate, actx.currentTime, 0.15);
+    else if (engineEl && !engineEl.paused) engineEl.playbackRate = rate;
   }
   function tone(freq, dur, type, vol, when) {
     if (!actx || muted) return;
@@ -292,6 +313,7 @@
     muteBtn.setAttribute("aria-pressed", String(muted));
     muteBtn.setAttribute("aria-label", muted ? "Unmute sound" : "Mute sound");
     if (engineGain) engineGain.gain.setTargetAtTime(muted ? 0.0001 : 0.55, actx.currentTime, 0.1);
+    if (engineEl) engineEl.volume = muted ? 0 : ENGINE_VOL;
   });
 
   /* ---------- Input ---------- */
@@ -378,11 +400,11 @@
     stopEngine();
     if (won) {
       sfxWin();
-      doc.getElementById("win-line").textContent = lives === 3 ? "A perfect lap: all three balloons safe!" : "You dodged " + dodged + " cones and crossed the line!";
+      doc.getElementById("win-line").textContent = lives === 3 ? "All 3 balloons safe. " + dodged + " cones dodged." : lives + (lives === 1 ? " balloon" : " balloons") + " left. " + dodged + " cones dodged.";
       if (!reduce) { burst(W / 2, H / 2 - 60, 60, ["#D62828", "#F2B705", "#2F6FD1", "#2BB673"]); }
       setTimeout(function () { show("win"); }, 900);
     } else {
-      doc.getElementById("lose-line").textContent = "You lasted " + Math.floor(t) + " seconds and dodged " + dodged + " cones. Try again?";
+      doc.getElementById("lose-line").textContent = "You lasted " + Math.floor(t) + " seconds and dodged " + dodged + " cones.";
       setTimeout(function () { show("lose"); }, 700);
     }
   }
@@ -597,7 +619,7 @@
 
   resize(); reset(); draw();
   /* read-only snapshot used for automated testing */
-  window.__rr = function () { return { state: state, t: t, lives: lives, dodged: dodged, speed: speed, car: { lane: car.lane, x: car.x, y: car.y }, obs: obs.map(function (o) { return { lane: o.lane, y: o.y, r: o.r }; }) }; };
+  window.__rr = function () { return { state: state, t: t, lives: lives, dodged: dodged, speed: speed, audio: engineSrc ? "webaudio-playing" : (engineEl ? (engineEl.paused ? "element-idle" : "element-playing") : "none"), car: { lane: car.lane, x: car.x, y: car.y }, obs: obs.map(function (o) { return { lane: o.lane, y: o.y, r: o.r }; }) }; };
 })();
 </script>
 </body>
