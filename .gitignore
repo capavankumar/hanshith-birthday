@@ -2,3 +2,4 @@ profile/
 *.log
 Thumbs.db
 .DS_Store
+PROJECT_NOTES.md
